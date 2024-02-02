@@ -1,0 +1,63 @@
+---
+- name: Deploy two Docker Containers using Ansible Playbook
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Starting Docker Daemon
+      service:
+       name: docker
+       state: started
+       enabled: yes
+
+    - name: Pull the httpd  Docker Image
+      docker_image:
+        name: httpd
+        tag: latest
+        source: pull
+
+    - name: Launching an HTTPD Container
+      docker_container:
+        name: apache-server
+        image: httpd
+        state: started
+        restart: yes
+        ports:
+          - "127.0.0.1:8888:80" 
+        networks:
+          - name: apache_subnet
+            ipv4_address: "172.18.0.2"
+
+    - name: Configure networking for Apache Container
+      docker_network:
+        name: apache_subnet
+        driver: bridge
+        ipam_driver: default
+        ipam_config:
+            - subnet: "172.18.0.0/16"
+
+    - name: Pulling the FTP image 
+      docker_image:
+        name: stilliard/pure-ftpd
+        source: pull
+
+    - name: Deploy an FTP Container
+      docker_container:
+        name: ftp-container
+        image: stilliard/pure-ftpd
+        state: started
+        ports:
+          - "127.0.0.1:2121:21"
+        networks:
+          - name: ftp-subnet
+            ipv4_address: "172.19.0.2"
+
+    - name: Configure networking for ftp  Container
+      docker_network:
+        name: ftp-subnet
+        driver: bridge
+        ipam_driver: default
+        ipam_config:
+          - subnet: "172.19.0.0/16"
+      
+
