@@ -5,4 +5,4 @@ sudo apt update - Update to latest
 Install Ansible - sudo apt install ansible
 Check Version - ansible --version
 Use the docker_container Ansible Module to run a docker container with Apache and ftp image 
-
+To run the playbook - ansible-playbook docker_deploy.yml
